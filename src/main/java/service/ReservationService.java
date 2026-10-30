@@ -95,7 +95,11 @@ public class ReservationService {
   }
 
   public Map<String, List<Reservation>> groupReservationsByCountry(List<Reservation> reservations) {
-
+    Map<String, List<Reservation>> viaje = reservations.stream()
+            .filter(a -> ubicacionDe(a) != null)
+            .sorted(Comparator.comparing(Reservation::getDate))
+            .collect(Collectors.groupingBy(this::ubicacionDe));
+    return viaje;
   }
 
   // Ejercicio 7
