@@ -74,9 +74,21 @@ public class ReservationService {
 
   // Ejercicio 3
   public List<Reservation> getTopNMostExpensive(
-      ReservationDao reservationDao, Instant from, Instant to, int n)
-      throws InvalidDateRangeException, DataAccessException {
-    throw new UnsupportedOperationException("Ejercicio 3: implement getTopNMostExpensive");
+          ReservationDao reservationDao, Instant from, Instant to, int n)
+          throws InvalidDateRangeException, DataAccessException {
+
+    if (from == null || to == null || from.isAfter(to)) {
+      throw new InvalidDateRangeException("Rango de fechas inválido o nulo");
+    }
+
+    if (n <= 0) {
+      return java.util.Collections.emptyList();
+    }
+
+    return reservationDao.findByDateRange(from, to).stream()
+            .sorted(java.util.Comparator.comparing(Reservation::calculatePrice).reversed())
+            .limit(n)
+            .collect(java.util.stream.Collectors.toList());
   }
 
   // Ejercicio 5
