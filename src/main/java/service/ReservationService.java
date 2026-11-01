@@ -19,6 +19,7 @@ import repository.dao.UserDao;
 import util.Pair;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -67,9 +68,16 @@ public class ReservationService {
 
   // Ejercicio 1
   public List<Reservation> getReservationsByUser(
-      List<Reservation> reservations, String username, UserDao userDao)
-      throws UserNotFoundException, DataAccessException {
-    throw new UnsupportedOperationException("Ejercicio 1: implement getReservationsByUser");
+          List<Reservation> reservations, String username, UserDao userDao)
+          throws UserNotFoundException, DataAccessException {
+    userDao.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+    if (reservations == null) {
+      return List.of();
+    }
+    return reservations.stream()
+            .filter(r -> r.getOwner() != null && username.equals(r.getOwner().getUsername()))
+            .sorted(Comparator.comparingDouble(Reservation::calculatePrice).reversed())
+            .toList();
   }
 
   // Ejercicio 3
