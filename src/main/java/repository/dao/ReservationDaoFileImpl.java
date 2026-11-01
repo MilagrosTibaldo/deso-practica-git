@@ -1,6 +1,8 @@
 package repository.dao;
 
 import domain.Reservation;
+import domain.TouristService;
+import domain.User;
 import exception.DataAccessException;
 
 import java.io.BufferedWriter;
@@ -49,8 +51,57 @@ public class ReservationDaoFileImpl implements ReservationDao {
   }
 
   // Ejercicio 3 (Parte A)
+  // Ejercicio 3 (Parte A)
   @Override
   public List<Reservation> findByDateRange(Instant from, Instant to) throws DataAccessException {
-    throw new UnsupportedOperationException("Ejercicio 3: implement findByDateRange");
+    List<Reservation> filteredReservations = new java.util.ArrayList<>();
+
+    if (!file.exists()) {
+      return filteredReservations;
+    }
+
+    try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file))) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        String[] parts = line.split(",");
+        //Me aseguro que la línea tiene id, serviceId, ownerId, date
+        if (parts.length < 4) continue;
+
+        Instant date = Instant.parse(parts[3]);
+
+        // Filtro x fecha (en ambos extremos)
+        if (date.compareTo(from) >= 0 && date.compareTo(to) <= 0) {
+          // 1. Convertir el ID de la reserva de String a Long
+          Long resId = Long.parseLong(parts[0]);
+
+          // 2. Instanciar un User ficticio y asignarle el ID recuperado como UUID
+          User owner = new User();
+          owner.setId(java.util.UUID.fromString(parts[2]));
+
+          // 3. Crear el servicio con una clase anónima (ya que TouristService suele ser interfaz)
+          TouristService service = new TouristService("nn") {
+            @Override
+            public String getId() { return parts[1]; }
+
+            @Override
+            public double calculatePrice() { return 0.0; } // Irrelevante para este filtro
+          };
+
+          // 4. Construir la reserva completa
+          Reservation res = new Reservation.Builder()
+                  .id(resId)
+                  .service(service)
+                  .owner(owner)
+                  .date(date)
+                  .build();
+
+          filteredReservations.add(res);
+        }
+      }
+    } catch (IOException e) {
+      throw new DataAccessException("Error leyendo el archivo de reservas", e);
+    }
+
+    return filteredReservations;
   }
 }
