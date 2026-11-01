@@ -1,8 +1,6 @@
 package service;
 
-import domain.Reservation;
-import domain.TouristService;
-import domain.User;
+import domain.*;
 import dto.reservation.CreateReservationRequest;
 import dto.reservation.ReservationResponse;
 import dto.reservation.ValidationResultDTO;
@@ -22,7 +20,8 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 public class ReservationService {
   private final ReservationDao reservationDao;
@@ -101,8 +100,26 @@ public class ReservationService {
   }
 
   // Ejercicio 5
+  private String ubicacionDe(Reservation reservation){
+    TouristService service = reservation.getService();
+    Location loc = null;
+    if(service instanceof Accommodation a){
+      loc = a.getLocation();
+    } else if (service instanceof Flight f) {
+      loc = f.getArrivalInfo();
+    }
+    if(loc == null){
+      return null;
+    }
+    return loc.getCountry();
+  }
+
   public Map<String, List<Reservation>> groupReservationsByCountry(List<Reservation> reservations) {
-    throw new UnsupportedOperationException("Ejercicio 5: implement groupReservationsByCountry");
+    Map<String, List<Reservation>> viaje = reservations.stream()
+            .filter(a -> ubicacionDe(a) != null)
+            .sorted(Comparator.comparing(Reservation::getDate))
+            .collect(Collectors.groupingBy(this::ubicacionDe));
+    return viaje;
   }
 
   // Ejercicio 7
