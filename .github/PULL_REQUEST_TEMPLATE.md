@@ -6,7 +6,7 @@ Marcar **únicamente** los ejercicios implementados que se desea que sean correg
 exigirá que los marcados pasen todos sus tests. Los ejercicios sin marcar se ignoran y no
 suman en contra, aunque sus tests continúen fallando.
 
-- [X] Ejercicio 1 — Filtrado y ordenamiento por precio
+- [ ] Ejercicio 1 — Filtrado y ordenamiento por precio
 - [ ] Ejercicio 2 — Agrupamiento y promedio por compañía
 - [ ] Ejercicio 3 — Top N reservas más caras en un rango de fechas
 - [ ] Ejercicio 4 — Ordenamiento compuesto de vuelos con enriquecimiento desde DAO
