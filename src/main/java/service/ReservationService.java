@@ -21,6 +21,7 @@ import util.Pair;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ReservationService {
   private final ReservationDao reservationDao;
@@ -105,7 +106,19 @@ public class ReservationService {
       Reservation newReservation,
       ReservationDao reservationDao)
       throws DuplicateReservationException, DataAccessException {
-    throw new UnsupportedOperationException("Ejercicio 8: implement addReservationIfNotDuplicate");
+
+    boolean duplicado = existingReservations.stream().anyMatch(
+            res -> Objects.equals(res.getOwner().getId(), newReservation.getOwner().getId())
+                              && Objects.equals(
+                                      res.getService().getId(), newReservation.getService().getId()
+            ));//El booleano guarda el resultado de comparar la nueva reserva con alguna qu ya exista con el mismo owner e id de servicio
+
+    if(duplicado) {throw new DuplicateReservationException(newReservation.getOwner().getId(), newReservation.getService().getId());}
+
+    reservationDao.save(newReservation);
+    return newReservation;
+
+   // throw new UnsupportedOperationException("Ejercicio 8: implement addReservationIfNotDuplicate");
   }
 
   // Ejercicio 10
