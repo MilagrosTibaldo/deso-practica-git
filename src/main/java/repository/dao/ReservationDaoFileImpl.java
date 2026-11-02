@@ -12,9 +12,17 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
 
+//Añado estas librerias
+import java.util.Map;
+import java.util.HashMap;
+
 public class ReservationDaoFileImpl implements ReservationDao {
   private static ReservationDaoFileImpl instance;
   private final File file;
+
+  //Guardo instancias de reservations
+  private final Map<String, Reservation> savedReservations = new HashMap<>();
+  /////
 
   private ReservationDaoFileImpl() {
     this.file = new File("reservations.csv");
@@ -38,13 +46,16 @@ public class ReservationDaoFileImpl implements ReservationDao {
   public void save(Reservation reservation) throws DataAccessException {
     try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
       String line =
-          String.format(
-              "%s,%s,%s,%s\n",
-              reservation.getId(),
-              reservation.getService().getId(),
-              reservation.getOwner().getId(),
-              reservation.getDate());
+              String.format(
+                      "%s,%s,%s,%s\n",
+                      reservation.getId(),
+                      reservation.getService().getId(),
+                      reservation.getOwner().getId(),
+                      reservation.getDate());
       bw.write(line);
+      //Añado que luego de escribir el archivo quede guardada la instancia en mem
+      savedReservations.put(reservation.getId(), reservation);
+      /////
     } catch (IOException e) {
       throw new DataAccessException("Error al guardar la reserva", e);
     }
@@ -71,6 +82,14 @@ public class ReservationDaoFileImpl implements ReservationDao {
 
         // Filtro x fecha (en ambos extremos)
         if (date.compareTo(from) >= 0 && date.compareTo(to) <= 0) {
+          // Añado que si la reserva fué guardada en la mem, se devuelva esa instancia en vez de llamarla otra vez desde el csv
+          Reservation cached = savedReservations.get(parts[0]);
+          if (cached != null) {
+            filteredReservations.add(cached);
+            continue;
+          }
+
+
           // 1. Convertir el ID de la reserva de String a Long
           Long resId = Long.parseLong(parts[0]);
 
